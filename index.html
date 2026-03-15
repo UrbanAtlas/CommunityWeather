@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community Weather — Brgy. Commonwealth</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
+
+    :root {
+      --sky-top: #1a0a2e;
+      --sky-mid: #3d1a5e;
+      --sky-horizon: #c0392b;
+      --sunset-orange: #e67e22;
+      --sunset-gold: #f39c12;
+      --sun-yellow: #f1c40f;
+      --amber: #e8a020;
+      --rust: #c0392b;
+      --warm-tan: #f5deb3;
+      --parchment: #fdf0d5;
+      --pixel-dark: #1a0a0a;
+      --pixel-mid: #2d1b0e;
+      --neon-cyan: #00eaff;
+      --neon-pink: #ff4fa3;
+      --ground: #4a2c0a;
+      --road: #2a1f0a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; min-height: 100vh;
+      background: var(--sky-top);
+      font-family: 'Press Start 2P', monospace;
+      image-rendering: pixelated;
+      color: var(--warm-tan);
+      overflow-x: hidden;
+    }
+
+    /* ── SKY GRADIENT ── */
+    body {
+      background: linear-gradient(
+        to bottom,
+        #1a0a2e 0%,
+        #3d1a5e 20%,
+        #7b1f3a 40%,
+        #c0392b 55%,
+        #e67e22 68%,
+        #f39c12 78%,
+        #e67e22 85%,
+        #7b1f3a 93%,
+        #1a0a2e 100%
+      );
+    }
+
+    /* ── STARS ── */
+    .stars {
+      position: fixed; top: 0; left: 0; width: 100%; height: 40%;
+      pointer-events: none; z-index: 0;
+    }
+    .star {
+      position: absolute;
+      width: 4px; height: 4px;
+      background: var(--warm-tan);
+      image-rendering: pixelated;
+      animation: twinkle 2s infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* ── SUN ── */
+    .sun {
+      position: fixed;
+      width: 64px; height: 64px;
+      right: 12%; top: 38%;
+      background: var(--sun-yellow);
+      box-shadow:
+        -4px 0 0 var(--amber),
+        4px 0 0 var(--amber),
+        0 -4px 0 var(--amber),
+        0 4px 0 var(--amber),
+        -8px 0 0 var(--sunset-orange),
+        8px 0 0 var(--sunset-orange),
+        0 -8px 0 var(--sunset-orange),
+        0 8px 0 var(--sunset-orange),
+        0 0 40px 20px rgba(243,156,18,0.35),
+        0 0 80px 40px rgba(230,126,34,0.2);
+      animation: sunpulse 3s ease-in-out infinite;
+      z-index: 1;
+      image-rendering: pixelated;
+    }
+    @keyframes sunpulse {
+      0%, 100% { box-shadow:
+        -4px 0 0 var(--amber), 4px 0 0 var(--amber),
+        0 -4px 0 var(--amber), 0 4px 0 var(--amber),
+        -8px 0 0 var(--sunset-orange), 8px 0 0 var(--sunset-orange),
+        0 -8px 0 var(--sunset-orange), 0 8px 0 var(--sunset-orange),
+        0 0 40px 20px rgba(243,156,18,0.35), 0 0 80px 40px rgba(230,126,34,0.2); }
+      50% { box-shadow:
+        -4px 0 0 var(--amber), 4px 0 0 var(--amber),
+        0 -4px 0 var(--amber), 0 4px 0 var(--amber),
+        -8px 0 0 var(--sunset-orange), 8px 0 0 var(--sunset-orange),
+        0 -8px 0 var(--sunset-orange), 0 8px 0 var(--sunset-orange),
+        0 0 60px 30px rgba(243,156,18,0.5), 0 0 120px 60px rgba(230,126,34,0.3); }
+    }
+
+    /* ── CITYSCAPE SVG BANNER ── */
+    .cityscape-wrap {
+      position: fixed;
+      bottom: 0; left: 0; width: 100%;
+      z-index: 2; pointer-events: none;
+    }
+    .cityscape-wrap svg { display: block; width: 100%; height: auto; }
+
+    /* ── MAIN LAYOUT ── */
+    .page {
+      position: relative; z-index: 10;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 12px 220px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      padding: 28px 16px 20px;
+      border-bottom: 4px solid var(--amber);
+    }
+    .header-title {
+      font-size: clamp(10px, 3vw, 18px);
+      color: var(--sun-yellow);
+      text-shadow:
+        2px 2px 0 var(--rust),
+        4px 4px 0 var(--pixel-dark);
+      letter-spacing: 2px;
+      line-height: 1.6;
+    }
+    .header-sub {
+      font-family: 'VT323', monospace;
+      font-size: clamp(16px, 3vw, 22px);
+      color: var(--warm-tan);
+      margin-top: 8px;
+      letter-spacing: 3px;
+    }
+    .pixel-divider {
+      margin: 10px auto;
+      height: 4px;
+      width: 80%;
+      background: repeating-linear-gradient(
+        to right,
+        var(--amber) 0px, var(--amber) 8px,
+        transparent 8px, transparent 16px
+      );
+    }
+
+    /* ── LOCATION BAR ── */
+    .location-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: rgba(26,10,46,0.75);
+      border: 4px solid var(--amber);
+      padding: 10px 14px;
+      margin: 16px 0;
+      image-rendering: pixelated;
+    }
+    .location-bar .loc-label {
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      color: var(--sunset-gold);
+    }
+    .location-bar .datetime {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--warm-tan);
+      text-align: right;
+    }
+
+    /* ── HERO WEATHER CARD ── */
+    .hero-card {
+      background: rgba(26,10,46,0.82);
+      border: 4px solid var(--amber);
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(to right, var(--rust), var(--amber), var(--sun-yellow), var(--amber), var(--rust));
+    }
+    .hero-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .hero-icon {
+      font-size: 72px;
+      line-height: 1;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 0 12px rgba(243,156,18,0.6));
+      animation: iconbob 2s ease-in-out infinite;
+    }
+    @keyframes iconbob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .hero-text { flex: 1; min-width: 180px; }
+    .hero-temp {
+      font-size: clamp(28px, 8vw, 52px);
+      color: var(--sun-yellow);
+      text-shadow: 3px 3px 0 var(--rust);
+      line-height: 1;
+    }
+    .hero-feels {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--warm-tan);
+      margin-top: 6px;
+    }
+    .hero-desc {
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      color: var(--amber);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      min-width: 180px;
+    }
+    .stat-box {
+      background: rgba(45,27,14,0.8);
+      border: 2px solid var(--sunset-orange);
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .stat-label {
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      color: var(--sunset-gold);
+      letter-spacing: 1px;
+    }
+    .stat-val {
+      font-size: 9px;
+      color: var(--warm-tan);
+      margin-top: 4px;
+    }
+
+    /* ── AREA GRID ── */
+    .section-title {
+      font-size: clamp(8px, 2vw, 11px);
+      color: var(--sunset-gold);
+      text-shadow: 2px 2px 0 var(--pixel-dark);
+      margin: 20px 0 10px;
+      letter-spacing: 1px;
+      border-left: 6px solid var(--amber);
+      padding-left: 10px;
+    }
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .area-card {
+      background: rgba(26,10,46,0.82);
+      border: 3px solid var(--sunset-orange);
+      padding: 12px 10px;
+      cursor: pointer;
+      transition: border-color 0.1s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .area-card:hover {
+      border-color: var(--sun-yellow);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--rust);
+    }
+    .area-card:active { transform: translate(0,0); box-shadow: none; }
+    .area-name {
+      font-size: 7px;
+      color: var(--amber);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .area-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .area-icon { font-size: 28px; }
+    .area-temp {
+      font-size: 13px;
+      color: var(--sun-yellow);
+      text-shadow: 1px 1px 0 var(--rust);
+    }
+    .area-desc {
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: var(--warm-tan);
+      margin-top: 4px;
+    }
+    .area-humidity {
+      font-family: 'VT323', monospace;
+      font-size: 13px;
+      color: #a0d8ef;
+      margin-top: 2px;
+    }
+
+    /* ── FORECAST ROW ── */
+    .forecast-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--amber) var(--pixel-dark);
+    }
+    .forecast-strip::-webkit-scrollbar { height: 6px; }
+    .forecast-strip::-webkit-scrollbar-track { background: var(--pixel-dark); }
+    .forecast-strip::-webkit-scrollbar-thumb { background: var(--amber); }
+
+    .forecast-card {
+      background: rgba(26,10,46,0.82);
+      border: 3px solid var(--rust);
+      padding: 10px 12px;
+      text-align: center;
+      min-width: 90px;
+      flex-shrink: 0;
+      transition: border-color 0.1s;
+    }
+    .forecast-card:hover { border-color: var(--amber); }
+    .fc-day {
+      font-size: 7px;
+      color: var(--amber);
+      margin-bottom: 6px;
+    }
+    .fc-icon { font-size: 28px; }
+    .fc-hi {
+      font-size: 10px;
+      color: var(--sun-yellow);
+      margin-top: 4px;
+    }
+    .fc-lo {
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      color: #a0c4ff;
+      margin-top: 2px;
+    }
+
+    /* ── ALERTS ── */
+    .alert-box {
+      background: rgba(192,57,43,0.3);
+      border: 3px solid var(--rust);
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .alert-icon { font-size: 22px; flex-shrink: 0; }
+    .alert-text {
+      font-family: 'VT323', monospace;
+      font-size: 17px;
+      color: #ffccaa;
+      line-height: 1.5;
+    }
+    .alert-title {
+      font-size: 8px;
+      color: #ff7043;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    /* ── RAIN METER ── */
+    .rain-meter {
+      background: rgba(26,10,46,0.82);
+      border: 3px solid var(--sunset-orange);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .rain-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 60px;
+      margin-top: 12px;
+    }
+    .rain-bar-wrap { flex: 1; text-align: center; }
+    .rain-bar {
+      background: var(--neon-cyan);
+      width: 100%;
+      border-top: 3px solid #fff;
+      animation: barrise 1s ease-out forwards;
+      transform-origin: bottom;
+    }
+    @keyframes barrise {
+      from { transform: scaleY(0); }
+      to { transform: scaleY(1); }
+    }
+    .rain-bar-label {
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+      color: var(--warm-tan);
+      margin-top: 4px;
+    }
+    .rain-bar-val {
+      font-family: 'VT323', monospace;
+      font-size: 11px;
+      color: var(--neon-cyan);
+      margin-bottom: 2px;
+    }
+
+    /* ── WIND COMPASS ── */
+    .compass-row {
+      display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .compass-box {
+      background: rgba(26,10,46,0.82);
+      border: 3px solid var(--sunset-orange);
+      padding: 14px;
+      flex: 1; min-width: 160px;
+      text-align: center;
+    }
+    .compass-ring {
+      width: 80px; height: 80px;
+      border: 4px solid var(--amber);
+      border-radius: 50%;
+      margin: 10px auto;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .compass-needle {
+      width: 4px; height: 36px;
+      background: linear-gradient(to bottom, var(--rust) 50%, var(--warm-tan) 50%);
+      transform-origin: bottom center;
+      position: absolute;
+      bottom: 50%;
+      left: calc(50% - 2px);
+      transform: rotate(45deg);
+      image-rendering: pixelated;
+    }
+    .compass-n {
+      font-size: 8px;
+      color: var(--amber);
+      position: absolute;
+      top: -14px; left: 50%; transform: translateX(-50%);
+    }
+    .compass-label {
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      color: var(--warm-tan);
+      margin-top: 4px;
+    }
+    .uv-box {
+      background: rgba(26,10,46,0.82);
+      border: 3px solid var(--sunset-orange);
+      padding: 14px;
+      flex: 1; min-width: 160px;
+    }
+    .uv-bar-track {
+      height: 14px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid var(--amber);
+      margin-top: 12px;
+      position: relative;
+    }
+    .uv-bar-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--neon-cyan), var(--sun-yellow), var(--rust));
+      width: 72%;
+      animation: uvfill 1.5s ease-out forwards;
+      transform-origin: left;
+    }
+    @keyframes uvfill {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    .uv-value {
+      font-size: 24px;
+      color: var(--sun-yellow);
+      text-shadow: 2px 2px 0 var(--rust);
+      text-align: center;
+      margin-top: 8px;
+    }
+    .uv-desc {
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      color: var(--amber);
+      text-align: center;
+    }
+
+    /* ── BOTTOM TICKER ── */
+    .ticker-wrap {
+      position: fixed;
+      bottom: 0; left: 0; width: 100%;
+      z-index: 100;
+      background: rgba(26,10,46,0.95);
+      border-top: 4px solid var(--amber);
+      padding: 6px 0;
+      overflow: hidden;
+    }
+    .ticker-inner {
+      display: flex;
+      white-space: nowrap;
+      animation: tickerscroll 30s linear infinite;
+    }
+    .ticker-item {
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      color: var(--amber);
+      padding: 0 24px;
+    }
+    .ticker-item span { color: var(--sun-yellow); }
+    @keyframes tickerscroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ── PIXEL RAIN OVERLAY ── */
+    .rain-overlay {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      overflow: hidden;
+      opacity: 0.12;
+    }
+    .raindrop {
+      position: absolute;
+      width: 2px;
+      background: #a0d8ef;
+      animation: fall linear infinite;
+      image-rendering: pixelated;
+    }
+    @keyframes fall {
+      from { transform: translateY(-100px); }
+      to { transform: translateY(110vh); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 520px) {
+      .hero-stats { grid-template-columns: 1fr 1fr; min-width: unset; width: 100%; }
+      .hero-inner { flex-direction: column; align-items: flex-start; }
+      .compass-row { flex-direction: column; }
+      .sun { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<!-- Sun -->
+<div class="sun"></div>
+
+<!-- Pixel Rain -->
+<div class="rain-overlay" id="rainOverlay"></div>
+
+<!-- Pixel Cityscape Banner -->
+<div class="cityscape-wrap">
+  <svg viewBox="0 0 1200 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <!-- Ground -->
+    <rect x="0" y="190" width="1200" height="30" fill="#4a2c0a"/>
+    <rect x="0" y="200" width="1200" height="20" fill="#2a1f0a"/>
+    <!-- Road stripe -->
+    <rect x="0" y="202" width="1200" height="4" fill="#3a2a0a"/>
+    <rect x="60" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="160" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="260" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="360" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="460" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="560" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="660" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="760" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="860" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="960" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="1060" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <rect x="1160" y="203" width="40" height="2" fill="#c0a020" opacity="0.5"/>
+    <!-- Trees -->
+    <rect x="20" y="172" width="10" height="20" fill="#2d4a1e"/>
+    <rect x="14" y="158" width="22" height="16" fill="#3a6228"/>
+    <rect x="18" y="148" width="14" height="14" fill="#4a7a30"/>
+    <rect x="200" y="175" width="8" height="16" fill="#2d4a1e"/>
+    <rect x="195" y="162" width="18" height="14" fill="#3a6228"/>
+    <rect x="198" y="153" width="12" height="12" fill="#4a7a30"/>
+    <rect x="580" y="174" width="10" height="18" fill="#2d4a1e"/>
+    <rect x="574" y="160" width="22" height="16" fill="#3a6228"/>
+    <rect x="578" y="150" width="14" height="14" fill="#4a7a30"/>
+    <rect x="900" y="172" width="10" height="20" fill="#2d4a1e"/>
+    <rect x="894" y="158" width="22" height="16" fill="#3a6228"/>
+    <rect x="898" y="148" width="14" height="14" fill="#4a7a30"/>
+    <rect x="1100" y="175" width="8" height="16" fill="#2d4a1e"/>
+    <rect x="1095" y="162" width="18" height="14" fill="#3a6228"/>
+    <rect x="1098" y="153" width="12" height="12" fill="#4a7a30"/>
+    <!-- Buildings silhouette -->
+    <!-- B1 -->
+    <rect x="40" y="110" width="60" height="82" fill="#1a0a2e"/>
+    <rect x="44" y="114" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="56" y="114" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="68" y="114" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="44" y="126" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="56" y="126" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="68" y="126" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="44" y="138" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="68" y="138" width="8" height="6" fill="#e67e22" opacity="0.3"/>
+    <rect x="44" y="150" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="56" y="150" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="68" y="150" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="44" y="162" width="8" height="6" fill="#e67e22" opacity="0.4"/>
+    <rect x="56" y="162" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="68" y="162" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="44" y="174" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="68" y="174" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <!-- B2 tall -->
+    <rect x="110" y="60" width="44" height="132" fill="#1a0a2e"/>
+    <rect x="128" y="52" width="8" height="10" fill="#2d1b0e"/>
+    <rect x="130" y="42" width="4" height="12" fill="#c0392b" opacity="0.8"/>
+    <rect x="114" y="64" width="6" height="5" fill="#f1c40f" opacity="0.7"/>
+    <rect x="124" y="64" width="6" height="5" fill="#e67e22" opacity="0.6"/>
+    <rect x="134" y="64" width="6" height="5" fill="#f1c40f" opacity="0.8"/>
+    <rect x="144" y="64" width="6" height="5" fill="#e67e22" opacity="0.5"/>
+    <rect x="114" y="76" width="6" height="5" fill="#e67e22" opacity="0.4"/>
+    <rect x="134" y="76" width="6" height="5" fill="#f1c40f" opacity="0.9"/>
+    <rect x="114" y="88" width="6" height="5" fill="#f1c40f" opacity="0.6"/>
+    <rect x="124" y="88" width="6" height="5" fill="#e67e22" opacity="0.7"/>
+    <rect x="144" y="88" width="6" height="5" fill="#f1c40f" opacity="0.5"/>
+    <rect x="114" y="100" width="6" height="5" fill="#e67e22" opacity="0.8"/>
+    <rect x="134" y="100" width="6" height="5" fill="#f1c40f" opacity="0.4"/>
+    <rect x="144" y="100" width="6" height="5" fill="#e67e22" opacity="0.9"/>
+    <rect x="114" y="112" width="6" height="5" fill="#f1c40f" opacity="0.7"/>
+    <rect x="124" y="112" width="6" height="5" fill="#e67e22" opacity="0.5"/>
+    <rect x="114" y="124" width="6" height="5" fill="#e67e22" opacity="0.6"/>
+    <rect x="134" y="124" width="6" height="5" fill="#f1c40f" opacity="0.8"/>
+    <rect x="144" y="124" width="6" height="5" fill="#e67e22" opacity="0.4"/>
+    <rect x="114" y="136" width="6" height="5" fill="#f1c40f" opacity="0.9"/>
+    <rect x="124" y="136" width="6" height="5" fill="#e67e22" opacity="0.7"/>
+    <rect x="114" y="148" width="6" height="5" fill="#e67e22" opacity="0.5"/>
+    <rect x="134" y="148" width="6" height="5" fill="#f1c40f" opacity="0.6"/>
+    <rect x="144" y="148" width="6" height="5" fill="#e67e22" opacity="0.8"/>
+    <rect x="114" y="160" width="6" height="5" fill="#f1c40f" opacity="0.4"/>
+    <rect x="124" y="160" width="6" height="5" fill="#e67e22" opacity="0.9"/>
+    <rect x="114" y="172" width="6" height="5" fill="#e67e22" opacity="0.7"/>
+    <rect x="134" y="172" width="6" height="5" fill="#f1c40f" opacity="0.5"/>
+    <rect x="144" y="172" width="6" height="5" fill="#e67e22" opacity="0.6"/>
+    <!-- B3 wide -->
+    <rect x="160" y="90" width="90" height="102" fill="#1a0a2e"/>
+    <rect x="164" y="94" width="10" height="8" fill="#f39c12" opacity="0.7"/>
+    <rect x="180" y="94" width="10" height="8" fill="#e67e22" opacity="0.5"/>
+    <rect x="196" y="94" width="10" height="8" fill="#f39c12" opacity="0.9"/>
+    <rect x="212" y="94" width="10" height="8" fill="#e67e22" opacity="0.6"/>
+    <rect x="228" y="94" width="10" height="8" fill="#f39c12" opacity="0.4"/>
+    <rect x="164" y="110" width="10" height="8" fill="#e67e22" opacity="0.8"/>
+    <rect x="196" y="110" width="10" height="8" fill="#f39c12" opacity="0.5"/>
+    <rect x="228" y="110" width="10" height="8" fill="#e67e22" opacity="0.9"/>
+    <rect x="164" y="126" width="10" height="8" fill="#f39c12" opacity="0.6"/>
+    <rect x="180" y="126" width="10" height="8" fill="#e67e22" opacity="0.4"/>
+    <rect x="212" y="126" width="10" height="8" fill="#f39c12" opacity="0.8"/>
+    <rect x="164" y="142" width="10" height="8" fill="#e67e22" opacity="0.7"/>
+    <rect x="196" y="142" width="10" height="8" fill="#f39c12" opacity="0.5"/>
+    <rect x="228" y="142" width="10" height="8" fill="#e67e22" opacity="0.6"/>
+    <rect x="164" y="158" width="10" height="8" fill="#f39c12" opacity="0.9"/>
+    <rect x="180" y="158" width="10" height="8" fill="#e67e22" opacity="0.7"/>
+    <rect x="212" y="158" width="10" height="8" fill="#f39c12" opacity="0.4"/>
+    <rect x="164" y="174" width="10" height="8" fill="#e67e22" opacity="0.5"/>
+    <rect x="196" y="174" width="10" height="8" fill="#f39c12" opacity="0.8"/>
+    <!-- B4 medium -->
+    <rect x="270" y="130" width="50" height="62" fill="#1a0a2e"/>
+    <rect x="274" y="134" width="7" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="286" y="134" width="7" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="298" y="134" width="7" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="310" y="134" width="7" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="274" y="146" width="7" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="298" y="146" width="7" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="274" y="158" width="7" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="286" y="158" width="7" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="310" y="158" width="7" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="274" y="170" width="7" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="298" y="170" width="7" height="6" fill="#f39c12" opacity="0.8"/>
+    <!-- B5 skyscraper -->
+    <rect x="340" y="40" width="56" height="152" fill="#1a0a2e"/>
+    <rect x="360" y="30" width="16" height="12" fill="#2d1b0e"/>
+    <rect x="366" y="20" width="4" height="12" fill="#c0392b"/>
+    <rect x="344" y="44" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="356" y="44" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="368" y="44" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="380" y="44" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="344" y="56" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="368" y="56" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="380" y="56" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="344" y="68" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="356" y="68" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="380" y="68" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="344" y="80" width="8" height="6" fill="#e67e22" opacity="0.4"/>
+    <rect x="368" y="80" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="344" y="92" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="356" y="92" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="380" y="92" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="344" y="104" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="368" y="104" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="344" y="116" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="356" y="116" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="380" y="116" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="344" y="128" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="368" y="128" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="344" y="140" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="356" y="140" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="380" y="140" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="344" y="152" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="368" y="152" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="344" y="164" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="356" y="164" width="8" height="6" fill="#e67e22" opacity="0.4"/>
+    <rect x="380" y="164" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="344" y="176" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="368" y="176" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <!-- B6 -->
+    <rect x="410" y="100" width="70" height="92" fill="#1a0a2e"/>
+    <rect x="414" y="104" width="9" height="7" fill="#f39c12" opacity="0.7"/>
+    <rect x="428" y="104" width="9" height="7" fill="#e67e22" opacity="0.5"/>
+    <rect x="442" y="104" width="9" height="7" fill="#f39c12" opacity="0.9"/>
+    <rect x="456" y="104" width="9" height="7" fill="#e67e22" opacity="0.6"/>
+    <rect x="468" y="104" width="9" height="7" fill="#f39c12" opacity="0.4"/>
+    <rect x="414" y="118" width="9" height="7" fill="#e67e22" opacity="0.8"/>
+    <rect x="442" y="118" width="9" height="7" fill="#f39c12" opacity="0.5"/>
+    <rect x="468" y="118" width="9" height="7" fill="#e67e22" opacity="0.9"/>
+    <rect x="414" y="132" width="9" height="7" fill="#f39c12" opacity="0.6"/>
+    <rect x="428" y="132" width="9" height="7" fill="#e67e22" opacity="0.4"/>
+    <rect x="456" y="132" width="9" height="7" fill="#f39c12" opacity="0.8"/>
+    <rect x="414" y="146" width="9" height="7" fill="#e67e22" opacity="0.7"/>
+    <rect x="442" y="146" width="9" height="7" fill="#f39c12" opacity="0.5"/>
+    <rect x="468" y="146" width="9" height="7" fill="#e67e22" opacity="0.6"/>
+    <rect x="414" y="160" width="9" height="7" fill="#f39c12" opacity="0.9"/>
+    <rect x="428" y="160" width="9" height="7" fill="#e67e22" opacity="0.7"/>
+    <rect x="456" y="160" width="9" height="7" fill="#f39c12" opacity="0.4"/>
+    <rect x="414" y="174" width="9" height="7" fill="#e67e22" opacity="0.5"/>
+    <rect x="442" y="174" width="9" height="7" fill="#f39c12" opacity="0.8"/>
+    <!-- B7 medium tall -->
+    <rect x="500" y="80" width="55" height="112" fill="#1a0a2e"/>
+    <rect x="520" y="72" width="14" height="10" fill="#2d1b0e"/>
+    <rect x="525" y="64" width="4" height="10" fill="#f1c40f" opacity="0.9"/>
+    <rect x="504" y="84" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="516" y="84" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="528" y="84" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="540" y="84" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="504" y="96" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="528" y="96" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="540" y="96" width="8" height="6" fill="#e67e22" opacity="0.4"/>
+    <rect x="504" y="108" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="516" y="108" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="540" y="108" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="504" y="120" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="528" y="120" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="504" y="132" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="516" y="132" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="540" y="132" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="504" y="144" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="528" y="144" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="504" y="156" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="516" y="156" width="8" height="6" fill="#e67e22" opacity="0.4"/>
+    <rect x="540" y="156" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="504" y="168" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="528" y="168" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="504" y="180" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="516" y="180" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <!-- Rightside buildings mirrored roughly -->
+    <rect x="640" y="110" width="65" height="82" fill="#1a0a2e"/>
+    <rect x="644" y="114" width="9" height="7" fill="#f39c12" opacity="0.6"/>
+    <rect x="658" y="114" width="9" height="7" fill="#e67e22" opacity="0.8"/>
+    <rect x="672" y="114" width="9" height="7" fill="#f39c12" opacity="0.5"/>
+    <rect x="686" y="114" width="9" height="7" fill="#e67e22" opacity="0.9"/>
+    <rect x="644" y="128" width="9" height="7" fill="#e67e22" opacity="0.7"/>
+    <rect x="672" y="128" width="9" height="7" fill="#f39c12" opacity="0.4"/>
+    <rect x="686" y="128" width="9" height="7" fill="#e67e22" opacity="0.6"/>
+    <rect x="644" y="142" width="9" height="7" fill="#f39c12" opacity="0.9"/>
+    <rect x="658" y="142" width="9" height="7" fill="#e67e22" opacity="0.5"/>
+    <rect x="686" y="142" width="9" height="7" fill="#f39c12" opacity="0.8"/>
+    <rect x="644" y="156" width="9" height="7" fill="#e67e22" opacity="0.6"/>
+    <rect x="672" y="156" width="9" height="7" fill="#f39c12" opacity="0.4"/>
+    <rect x="644" y="170" width="9" height="7" fill="#f39c12" opacity="0.7"/>
+    <rect x="658" y="170" width="9" height="7" fill="#e67e22" opacity="0.9"/>
+    <rect x="686" y="170" width="9" height="7" fill="#f39c12" opacity="0.5"/>
+    <rect x="644" y="184" width="9" height="7" fill="#e67e22" opacity="0.8"/>
+    <rect x="672" y="184" width="9" height="7" fill="#f39c12" opacity="0.6"/>
+
+    <rect x="720" y="60" width="48" height="132" fill="#1a0a2e"/>
+    <rect x="738" y="50" width="12" height="12" fill="#2d1b0e"/>
+    <rect x="742" y="40" width="4" height="12" fill="#c0392b"/>
+    <rect x="724" y="64" width="7" height="5" fill="#f39c12" opacity="0.8"/>
+    <rect x="736" y="64" width="7" height="5" fill="#e67e22" opacity="0.6"/>
+    <rect x="750" y="64" width="7" height="5" fill="#f39c12" opacity="0.9"/>
+    <rect x="724" y="76" width="7" height="5" fill="#e67e22" opacity="0.7"/>
+    <rect x="750" y="76" width="7" height="5" fill="#f39c12" opacity="0.4"/>
+    <rect x="724" y="88" width="7" height="5" fill="#f39c12" opacity="0.5"/>
+    <rect x="736" y="88" width="7" height="5" fill="#e67e22" opacity="0.8"/>
+    <rect x="724" y="100" width="7" height="5" fill="#e67e22" opacity="0.6"/>
+    <rect x="750" y="100" width="7" height="5" fill="#f39c12" opacity="0.7"/>
+    <rect x="724" y="112" width="7" height="5" fill="#f39c12" opacity="0.9"/>
+    <rect x="736" y="112" width="7" height="5" fill="#e67e22" opacity="0.5"/>
+    <rect x="724" y="124" width="7" height="5" fill="#e67e22" opacity="0.4"/>
+    <rect x="750" y="124" width="7" height="5" fill="#f39c12" opacity="0.8"/>
+    <rect x="724" y="136" width="7" height="5" fill="#f39c12" opacity="0.6"/>
+    <rect x="736" y="136" width="7" height="5" fill="#e67e22" opacity="0.9"/>
+    <rect x="724" y="148" width="7" height="5" fill="#e67e22" opacity="0.7"/>
+    <rect x="750" y="148" width="7" height="5" fill="#f39c12" opacity="0.5"/>
+    <rect x="724" y="160" width="7" height="5" fill="#f39c12" opacity="0.4"/>
+    <rect x="736" y="160" width="7" height="5" fill="#e67e22" opacity="0.8"/>
+    <rect x="724" y="172" width="7" height="5" fill="#e67e22" opacity="0.6"/>
+    <rect x="750" y="172" width="7" height="5" fill="#f39c12" opacity="0.7"/>
+    <rect x="724" y="184" width="7" height="5" fill="#f39c12" opacity="0.9"/>
+
+    <rect x="790" y="90" width="80" height="102" fill="#1a0a2e"/>
+    <rect x="794" y="94" width="10" height="8" fill="#f39c12" opacity="0.6"/>
+    <rect x="810" y="94" width="10" height="8" fill="#e67e22" opacity="0.8"/>
+    <rect x="826" y="94" width="10" height="8" fill="#f39c12" opacity="0.5"/>
+    <rect x="842" y="94" width="10" height="8" fill="#e67e22" opacity="0.9"/>
+    <rect x="856" y="94" width="10" height="8" fill="#f39c12" opacity="0.4"/>
+    <rect x="794" y="108" width="10" height="8" fill="#e67e22" opacity="0.7"/>
+    <rect x="826" y="108" width="10" height="8" fill="#f39c12" opacity="0.5"/>
+    <rect x="856" y="108" width="10" height="8" fill="#e67e22" opacity="0.6"/>
+    <rect x="794" y="122" width="10" height="8" fill="#f39c12" opacity="0.9"/>
+    <rect x="810" y="122" width="10" height="8" fill="#e67e22" opacity="0.4"/>
+    <rect x="842" y="122" width="10" height="8" fill="#f39c12" opacity="0.8"/>
+    <rect x="794" y="136" width="10" height="8" fill="#e67e22" opacity="0.6"/>
+    <rect x="826" y="136" width="10" height="8" fill="#f39c12" opacity="0.5"/>
+    <rect x="856" y="136" width="10" height="8" fill="#e67e22" opacity="0.7"/>
+    <rect x="794" y="150" width="10" height="8" fill="#f39c12" opacity="0.4"/>
+    <rect x="810" y="150" width="10" height="8" fill="#e67e22" opacity="0.9"/>
+    <rect x="842" y="150" width="10" height="8" fill="#f39c12" opacity="0.6"/>
+    <rect x="794" y="164" width="10" height="8" fill="#e67e22" opacity="0.8"/>
+    <rect x="826" y="164" width="10" height="8" fill="#f39c12" opacity="0.7"/>
+    <rect x="856" y="164" width="10" height="8" fill="#e67e22" opacity="0.5"/>
+    <rect x="794" y="178" width="10" height="8" fill="#f39c12" opacity="0.6"/>
+    <rect x="810" y="178" width="10" height="8" fill="#e67e22" opacity="0.4"/>
+    <rect x="842" y="178" width="10" height="8" fill="#f39c12" opacity="0.9"/>
+
+    <rect x="886" y="120" width="52" height="72" fill="#1a0a2e"/>
+    <rect x="890" y="124" width="7" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="902" y="124" width="7" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="914" y="124" width="7" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="928" y="124" width="7" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="890" y="136" width="7" height="6" fill="#e67e22" opacity="0.4"/>
+    <rect x="914" y="136" width="7" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="890" y="148" width="7" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="902" y="148" width="7" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="928" y="148" width="7" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="890" y="160" width="7" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="914" y="160" width="7" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="890" y="172" width="7" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="902" y="172" width="7" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="928" y="172" width="7" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="890" y="184" width="7" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="914" y="184" width="7" height="6" fill="#f39c12" opacity="0.7"/>
+
+    <rect x="955" y="70" width="58" height="122" fill="#1a0a2e"/>
+    <rect x="974" y="60" width="20" height="12" fill="#2d1b0e"/>
+    <rect x="981" y="50" width="6" height="12" fill="#c0392b" opacity="0.9"/>
+    <rect x="959" y="74" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="972" y="74" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="985" y="74" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="998" y="74" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="959" y="86" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="985" y="86" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="959" y="98" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="972" y="98" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="998" y="98" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="959" y="110" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="985" y="110" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="959" y="122" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="972" y="122" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="998" y="122" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="959" y="134" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="985" y="134" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="959" y="146" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="972" y="146" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="998" y="146" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="959" y="158" width="8" height="6" fill="#e67e22" opacity="0.5"/>
+    <rect x="985" y="158" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+    <rect x="959" y="170" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="972" y="170" width="8" height="6" fill="#e67e22" opacity="0.4"/>
+    <rect x="998" y="170" width="8" height="6" fill="#f39c12" opacity="0.8"/>
+    <rect x="959" y="182" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="985" y="182" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+
+    <rect x="1030" y="95" width="60" height="97" fill="#1a0a2e"/>
+    <rect x="1034" y="99" width="8" height="7" fill="#f39c12" opacity="0.7"/>
+    <rect x="1048" y="99" width="8" height="7" fill="#e67e22" opacity="0.5"/>
+    <rect x="1062" y="99" width="8" height="7" fill="#f39c12" opacity="0.9"/>
+    <rect x="1076" y="99" width="8" height="7" fill="#e67e22" opacity="0.6"/>
+    <rect x="1034" y="112" width="8" height="7" fill="#e67e22" opacity="0.4"/>
+    <rect x="1062" y="112" width="8" height="7" fill="#f39c12" opacity="0.8"/>
+    <rect x="1076" y="112" width="8" height="7" fill="#e67e22" opacity="0.5"/>
+    <rect x="1034" y="125" width="8" height="7" fill="#f39c12" opacity="0.7"/>
+    <rect x="1048" y="125" width="8" height="7" fill="#e67e22" opacity="0.9"/>
+    <rect x="1076" y="125" width="8" height="7" fill="#f39c12" opacity="0.4"/>
+    <rect x="1034" y="138" width="8" height="7" fill="#e67e22" opacity="0.6"/>
+    <rect x="1062" y="138" width="8" height="7" fill="#f39c12" opacity="0.5"/>
+    <rect x="1034" y="151" width="8" height="7" fill="#f39c12" opacity="0.8"/>
+    <rect x="1048" y="151" width="8" height="7" fill="#e67e22" opacity="0.7"/>
+    <rect x="1076" y="151" width="8" height="7" fill="#f39c12" opacity="0.9"/>
+    <rect x="1034" y="164" width="8" height="7" fill="#e67e22" opacity="0.4"/>
+    <rect x="1062" y="164" width="8" height="7" fill="#f39c12" opacity="0.6"/>
+    <rect x="1034" y="177" width="8" height="7" fill="#f39c12" opacity="0.5"/>
+    <rect x="1048" y="177" width="8" height="7" fill="#e67e22" opacity="0.8"/>
+    <rect x="1076" y="177" width="8" height="7" fill="#f39c12" opacity="0.7"/>
+
+    <rect x="1110" y="130" width="58" height="62" fill="#1a0a2e"/>
+    <rect x="1114" y="134" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="1128" y="134" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="1142" y="134" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="1156" y="134" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="1114" y="146" width="8" height="6" fill="#e67e22" opacity="0.7"/>
+    <rect x="1142" y="146" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="1114" y="158" width="8" height="6" fill="#f39c12" opacity="0.6"/>
+    <rect x="1128" y="158" width="8" height="6" fill="#e67e22" opacity="0.9"/>
+    <rect x="1156" y="158" width="8" height="6" fill="#f39c12" opacity="0.5"/>
+    <rect x="1114" y="170" width="8" height="6" fill="#e67e22" opacity="0.8"/>
+    <rect x="1142" y="170" width="8" height="6" fill="#f39c12" opacity="0.7"/>
+    <rect x="1114" y="182" width="8" height="6" fill="#f39c12" opacity="0.4"/>
+    <rect x="1128" y="182" width="8" height="6" fill="#e67e22" opacity="0.6"/>
+    <rect x="1156" y="182" width="8" height="6" fill="#f39c12" opacity="0.9"/>
+  </svg>
+</div>
+
+<!-- MAIN PAGE -->
+<div class="page">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-title">☁ COMMUNITY WEATHER ☀</div>
+    <div class="pixel-divider"></div>
+    <div class="header-sub">BARANGAY COMMONWEALTH · QUEZON CITY</div>
+  </div>
+
+  <!-- LOCATION + TIME BAR -->
+  <div class="location-bar">
+    <div class="loc-label">📍 Commonwealth, QC · Metro Manila</div>
+    <div class="datetime" id="datetime">SUN 15 MAR 2026 · 06:00 PHT</div>
+  </div>
+
+  <!-- ALERT -->
+  <div class="alert-box">
+    <div class="alert-icon">⚠</div>
+    <div>
+      <div class="alert-title">PAGASA ADVISORY</div>
+      <div class="alert-text">Heat index may reach up to 42°C in parts of Metro Manila. Stay hydrated and avoid prolonged sun exposure between 10AM–3PM.</div>
+    </div>
+  </div>
+
+  <!-- HERO CARD -->
+  <div class="hero-card">
+    <div class="hero-inner">
+      <div class="hero-icon" id="heroIcon">☀️</div>
+      <div class="hero-text">
+        <div class="hero-temp" id="heroTemp">34°C</div>
+        <div class="hero-feels">Feels like <span id="heroFeels">40°C</span></div>
+        <div class="hero-desc" id="heroDesc">Sunny & Hot</div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-label">HUMIDITY</div>
+          <div class="stat-val" id="statHumidity">78%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">PRESSURE</div>
+          <div class="stat-val" id="statPressure">1009 hPa</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">WIND</div>
+          <div class="stat-val" id="statWind">14 km/h SW</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">VISIBILITY</div>
+          <div class="stat-val" id="statVis">9.5 km</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7-DAY FORECAST -->
+  <div class="section-title">▶ 7-DAY FORECAST</div>
+  <div class="forecast-strip" id="forecastStrip"></div>
+
+  <!-- RAIN PROBABILITY -->
+  <div class="section-title">▶ RAIN PROBABILITY (NEXT 8 HRS)</div>
+  <div class="rain-meter">
+    <div class="rain-bars" id="rainBars"></div>
+  </div>
+
+  <!-- WIND + UV -->
+  <div class="section-title">▶ WIND & UV INDEX</div>
+  <div class="compass-row">
+    <div class="compass-box">
+      <div class="section-title" style="margin:0 0 4px; border:none; padding:0; font-size:8px;">WIND DIRECTION</div>
+      <div class="compass-ring">
+        <span class="compass-n">N</span>
+        <div class="compass-needle" id="compassNeedle"></div>
+      </div>
+      <div class="compass-label" id="windLabel">SW · 14 km/h</div>
+    </div>
+    <div class="uv-box">
+      <div class="section-title" style="margin:0 0 4px; border:none; padding:0; font-size:8px;">UV INDEX</div>
+      <div class="uv-value" id="uvVal">9</div>
+      <div class="uv-desc" id="uvDesc">VERY HIGH</div>
+      <div class="uv-bar-track">
+        <div class="uv-bar-fill" id="uvBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AREAS -->
+  <div class="section-title">▶ CONDITIONS AROUND COMMONWEALTH</div>
+  <div class="area-grid" id="areaGrid"></div>
+
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="ticker"></div>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════
+  // COMMUNITY WEATHER — Live Data via Open-Meteo API
+  // Coordinates: Brgy. Commonwealth, Quezon City
+  // Refreshes every 30 minutes automatically
+  // ══════════════════════════════════════════════════
+
+  const LAT = 14.6760;
+  const LON = 121.0701;
+  const REFRESH_MS = 30 * 60 * 1000; // 30 minutes
+
+  // ── AREA OFFSETS (slight lat/lon variations around Commonwealth) ──
+  const AREAS = [
+    { name: 'Commonwealth Ave (Main)', lat: 14.6760, lon: 121.0701 },
+    { name: 'UP Commonwealth',         lat: 14.6800, lon: 121.0650 },
+    { name: 'Litex Area',              lat: 14.6820, lon: 121.0730 },
+    { name: 'Batasan Hills',           lat: 14.6870, lon: 121.0920 },
+    { name: 'Lupang Pangako',          lat: 14.6910, lon: 121.0800 },
+    { name: 'Holy Spirit Drive',       lat: 14.6700, lon: 121.0760 },
+    { name: 'Don Fabian St',           lat: 14.6740, lon: 121.0840 },
+    { name: 'Payatas Rd Area',         lat: 14.6950, lon: 121.0850 },
+    { name: 'Tandang Sora End',        lat: 14.6620, lon: 121.0600 },
+    { name: 'Sanville Subdivision',    lat: 14.6680, lon: 121.0670 },
+    { name: 'Capitol Hills Drive',     lat: 14.6590, lon: 121.0720 },
+    { name: 'Duyan-Duyan Area',        lat: 14.6850, lon: 121.0780 },
+  ];
+
+  // ── WMO WEATHER CODE → emoji + description ──
+  function wmoToWeather(code) {
+    if (code === 0)              return { icon: '☀️',  desc: 'Clear Sky' };
+    if (code === 1)              return { icon: '🌤️', desc: 'Mainly Clear' };
+    if (code === 2)              return { icon: '⛅',  desc: 'Partly Cloudy' };
+    if (code === 3)              return { icon: '☁️',  desc: 'Overcast' };
+    if ([45,48].includes(code)) return { icon: '🌫️', desc: 'Foggy' };
+    if ([51,53,55].includes(code)) return { icon: '🌦️', desc: 'Drizzle' };
+    if ([61,63,65].includes(code)) return { icon: '🌧️', desc: 'Rain' };
+    if ([71,73,75,77].includes(code)) return { icon: '❄️', desc: 'Snow' };
+    if ([80,81,82].includes(code)) return { icon: '🌦️', desc: 'Rain Showers' };
+    if ([85,86].includes(code)) return { icon: '🌨️', desc: 'Snow Showers' };
+    if ([95,96,99].includes(code)) return { icon: '⛈️', desc: 'Thunderstorm' };
+    return { icon: '🌡️', desc: 'Unknown' };
+  }
+
+  // ── WIND DEGREE → DIRECTION LABEL ──
+  function degToDir(deg) {
+    const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+    return dirs[Math.round(deg / 45) % 8];
+  }
+
+  // ── UV INDEX → LABEL ──
+  function uvLabel(uv) {
+    if (uv <= 2)  return 'LOW';
+    if (uv <= 5)  return 'MODERATE';
+    if (uv <= 7)  return 'HIGH';
+    if (uv <= 10) return 'VERY HIGH';
+    return 'EXTREME';
+  }
+
+  // ── FORMAT 12HR TIME ──
+  function fmt12(isoStr) {
+    const d = new Date(isoStr);
+    let h = d.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ampm;
+  }
+
+  // ── HEAT INDEX ESTIMATE (Steadman simplified) ──
+  function heatIndex(T, RH) {
+    if (T < 27) return T;
+    const HI = -8.78469475556 + 1.61139411*T + 2.33854883889*RH
+      - 0.14611605*T*RH - 0.012308094*T*T
+      - 0.016424828*RH*RH + 0.002211732*T*T*RH
+      + 0.00072546*T*RH*RH - 0.000003582*T*T*RH*RH;
+    return Math.round(HI);
+  }
+
+  // ── PAGASA-STYLE HEAT ADVISORY ──
+  function heatAdvisory(hi) {
+    if (hi >= 52) return { level: '🔴 DANGER', msg: 'Heat stroke highly likely. Avoid all outdoor activity.' };
+    if (hi >= 42) return { level: '🟠 EXTREME CAUTION', msg: `Heat index at ${hi}°C. Limit sun exposure 10AM–3PM. Stay hydrated.` };
+    if (hi >= 33) return { level: '🟡 CAUTION', msg: `Heat index at ${hi}°C. Drink plenty of water and rest in shade.` };
+    return { level: '🟢 NORMAL', msg: 'Conditions are comfortable. Stay hydrated as always.' };
+  }
+
+  // ── STARS ──
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 100 + '%';
+    s.style.animationDelay    = Math.random() * 2 + 's';
+    s.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    starsEl.appendChild(s);
+  }
+
+  // ── RAIN DROPS ──
+  const rainEl = document.getElementById('rainOverlay');
+  for (let i = 0; i < 30; i++) {
+    const r = document.createElement('div');
+    r.className = 'raindrop';
+    r.style.left = Math.random() * 100 + '%';
+    r.style.height = (8 + Math.floor(Math.random() * 16)) + 'px';
+    r.style.animationDuration = (0.6 + Math.random() * 1.2) + 's';
+    r.style.animationDelay    = Math.random() * 2 + 's';
+    rainEl.appendChild(r);
+  }
+
+  // ── CLOCK (updates every minute) ──
+  function updateTime() {
+    const now  = new Date();
+    const DAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    const MONS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('datetime').textContent =
+      `${DAYS[now.getDay()]} ${String(now.getDate()).padStart(2,'0')} ${MONS[now.getMonth()]} ${now.getFullYear()} · ${hh}:${mm} PHT`;
+  }
+  updateTime();
+  setInterval(updateTime, 60000);
+
+  // ── LOADING STATE ──
+  function setLoading(on) {
+    const ids = ['heroTemp','heroFeels','heroDesc','statHumidity','statPressure','statWind','statVis','uvVal','uvDesc','windLabel'];
+    ids.forEach(id => {
+      if (on) document.getElementById(id).textContent = '...';
+    });
+    if (on) {
+      document.getElementById('heroIcon').textContent = '⏳';
+      document.getElementById('forecastStrip').innerHTML = '<div style="font-family:VT323,monospace;font-size:18px;color:var(--amber);padding:10px;">Loading forecast...</div>';
+      document.getElementById('rainBars').innerHTML     = '<div style="font-family:VT323,monospace;font-size:18px;color:var(--amber);padding:10px;">Loading rain data...</div>';
+      document.getElementById('areaGrid').innerHTML     = '<div style="font-family:VT323,monospace;font-size:18px;color:var(--amber);padding:10px;">Fetching area conditions...</div>';
+    }
+  }
+
+  // ── BUILD TICKER ──
+  function buildTicker(data) {
+    const { temp, feelsLike, humidity, pressure, wind, uv, uvLbl, desc, tomorrowHi, tomorrowDesc } = data;
+    const items = [
+      `☀ TODAY: ${desc} — ${temp}°C`,
+      `💧 HUMIDITY: ${humidity}% — ${humidity > 80 ? 'Very Humid' : 'Moderate'}`,
+      `🌬 WIND: ${wind}`,
+      `⚠ FEELS LIKE: ${feelsLike}°C — ${feelsLike >= 42 ? 'Extreme Caution' : feelsLike >= 33 ? 'Use Caution' : 'Comfortable'}`,
+      `🌤 TOMORROW: ${tomorrowDesc} — ${tomorrowHi}°C`,
+      `📍 COMMONWEALTH, QUEZON CITY — Metro Manila`,
+      `☁ UV INDEX: ${uv} — ${uvLbl} — ${uv >= 6 ? 'Wear Sunscreen' : 'Minimal Risk'}`,
+      `🌊 PRESSURE: ${pressure} hPa`,
+      `🌡 HEAT INDEX: ${feelsLike}°C`,
+      `🔄 LAST UPDATED: ${new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })} PHT`,
+    ];
+    const ticker = document.getElementById('ticker');
+    ticker.innerHTML = '';
+    [...items, ...items].forEach(t => {
+      const el = document.createElement('span');
+      el.className = 'ticker-item';
+      el.innerHTML = `<span>◆</span> ${t} `;
+      ticker.appendChild(el);
+    });
+  }
+
+  // ── MAIN FETCH: Open-Meteo ──
+  async function fetchWeather() {
+    setLoading(true);
+
+    // Build multi-location query string for all areas
+    const areaParams = AREAS.map((a, i) =>
+      `&latitude=${a.lat}&longitude=${a.lon}`
+    ).join('');
+
+    // Primary location fetch (Commonwealth center)
+    const primaryURL = `https://api.open-meteo.com/v1/forecast?` +
+      `latitude=${LAT}&longitude=${LON}` +
+      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,` +
+      `weather_code,surface_pressure,wind_speed_10m,wind_direction_10m,visibility` +
+      `&hourly=precipitation_probability,uv_index` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min` +
+      `&timezone=Asia%2FManila&forecast_days=7`;
+
+    // Fetch all area conditions in parallel using Open-Meteo multi-location
+    const areaURLs = AREAS.map(a =>
+      `https://api.open-meteo.com/v1/forecast?` +
+      `latitude=${a.lat}&longitude=${a.lon}` +
+      `&current=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature` +
+      `&timezone=Asia%2FManila`
+    );
+
+    try {
+      const [primary, ...areaResults] = await Promise.all([
+        fetch(primaryURL).then(r => r.json()),
+        ...areaURLs.map(u => fetch(u).then(r => r.json()))
+      ]);
+
+      // ── CURRENT CONDITIONS ──
+      const cur = primary.current;
+      const temp     = Math.round(cur.temperature_2m);
+      const humidity = cur.relative_humidity_2m;
+      const feelsLike = heatIndex(temp, humidity);
+      const pressure = Math.round(cur.surface_pressure);
+      const windSpd  = Math.round(cur.wind_speed_10m);
+      const windDir  = degToDir(cur.wind_direction_10m);
+      const vis      = (cur.visibility / 1000).toFixed(1);
+      const wmo      = cur.weather_code;
+      const { icon, desc } = wmoToWeather(wmo);
+
+      // ── HOURLY: find next 8 hours for rain probability ──
+      const now = new Date();
+      const hourlyTimes = primary.hourly.time;
+      const hourlyRain  = primary.hourly.precipitation_probability;
+      const hourlyUV    = primary.hourly.uv_index;
+
+      // Find current hour index
+      const curHourISO = now.toISOString().slice(0,13);
+      let hIdx = hourlyTimes.findIndex(t => t.startsWith(curHourISO));
+      if (hIdx < 0) hIdx = 0;
+
+      const next8Rain = hourlyTimes.slice(hIdx, hIdx + 8).map((t, i) => ({
+        hr: fmt12(t),
+        pct: hourlyRain[hIdx + i] ?? 0
+      }));
+
+      // Current UV (use current hour)
+      const uv = Math.round(hourlyUV[hIdx] ?? 0);
+      const uvLbl = uvLabel(uv);
+      const uvPct = Math.min(100, Math.round((uv / 12) * 100));
+
+      // ── DAILY FORECAST ──
+      const daily = primary.daily;
+      const DAYNAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+      const forecastDays = daily.time.map((t, i) => {
+        const d = new Date(t + 'T00:00:00+08:00');
+        const label = i === 0 ? 'TODAY' : DAYNAMES[d.getDay()];
+        const { icon: fIcon } = wmoToWeather(daily.weather_code[i]);
+        return {
+          day:  label,
+          icon: fIcon,
+          hi:   Math.round(daily.temperature_2m_max[i]),
+          lo:   Math.round(daily.temperature_2m_min[i]),
+          desc: wmoToWeather(daily.weather_code[i]).desc,
+        };
+      });
+
+      // ── ADVISORY ──
+      const advisory = heatAdvisory(feelsLike);
+      document.querySelector('.alert-title').textContent  = `PAGASA ADVISORY — ${advisory.level}`;
+      document.querySelector('.alert-text').textContent   = advisory.msg;
+
+      // ── RENDER HERO ──
+      document.getElementById('heroIcon').textContent    = icon;
+      document.getElementById('heroTemp').textContent    = temp + '°C';
+      document.getElementById('heroFeels').textContent   = feelsLike + '°C';
+      document.getElementById('heroDesc').textContent    = desc;
+      document.getElementById('statHumidity').textContent = humidity + '%';
+      document.getElementById('statPressure').textContent = pressure + ' hPa';
+      document.getElementById('statWind').textContent    = `${windSpd} km/h ${windDir}`;
+      document.getElementById('statVis').textContent     = vis + ' km';
+
+      // ── RENDER UV ──
+      document.getElementById('uvVal').textContent       = uv;
+      document.getElementById('uvDesc').textContent      = uvLbl;
+      document.getElementById('uvBar').style.width       = uvPct + '%';
+
+      // ── RENDER WIND COMPASS ──
+      document.getElementById('windLabel').textContent   = `${windDir} · ${windSpd} km/h`;
+      document.getElementById('compassNeedle').style.transform = `rotate(${cur.wind_direction_10m}deg)`;
+
+      // ── RENDER 7-DAY FORECAST ──
+      const strip = document.getElementById('forecastStrip');
+      strip.innerHTML = '';
+      forecastDays.forEach(f => {
+        strip.innerHTML += `<div class="forecast-card">
+          <div class="fc-day">${f.day}</div>
+          <div class="fc-icon">${f.icon}</div>
+          <div class="fc-hi">${f.hi}°C</div>
+          <div class="fc-lo">${f.lo}°C</div>
+        </div>`;
+      });
+
+      // ── RENDER RAIN BARS ──
+      const maxH = 52;
+      const rainBarsEl = document.getElementById('rainBars');
+      rainBarsEl.innerHTML = '';
+      next8Rain.forEach((r, i) => {
+        const h = Math.max(2, Math.round((r.pct / 100) * maxH));
+        rainBarsEl.innerHTML += `<div class="rain-bar-wrap">
+          <div class="rain-bar-val">${r.pct}%</div>
+          <div class="rain-bar" style="height:${h}px; animation-delay:${i * 0.1}s;"></div>
+          <div class="rain-bar-label">${r.hr}</div>
+        </div>`;
+      });
+
+      // ── RENDER AREA CARDS ──
+      const grid = document.getElementById('areaGrid');
+      grid.innerHTML = '';
+      AREAS.forEach((area, i) => {
+        const ac = areaResults[i]?.current;
+        if (!ac) return;
+        const aTemp = Math.round(ac.temperature_2m);
+        const aHum  = ac.relative_humidity_2m;
+        const aHI   = heatIndex(aTemp, aHum);
+        const { icon: aIcon, desc: aDesc } = wmoToWeather(ac.weather_code);
+        grid.innerHTML += `<div class="area-card">
+          <div class="area-name">${area.name.toUpperCase()}</div>
+          <div class="area-row">
+            <span class="area-icon">${aIcon}</span>
+            <span class="area-temp">${aTemp}°C</span>
+          </div>
+          <div class="area-desc">${aDesc}</div>
+          <div class="area-humidity">${aHum}% 💧 · Feels ${aHI}°C</div>
+        </div>`;
+      });
+
+      // ── RENDER TICKER ──
+      buildTicker({
+        temp, feelsLike, humidity, pressure,
+        wind: `${windSpd} km/h ${windDir}`,
+        uv, uvLbl, desc,
+        tomorrowHi:   forecastDays[1]?.hi ?? '?',
+        tomorrowDesc: forecastDays[1]?.desc ?? '?',
+      });
+
+      console.log(`[Community Weather] Data refreshed at ${new Date().toLocaleTimeString()}`);
+
+    } catch (err) {
+      console.error('[Community Weather] Fetch error:', err);
+      document.querySelector('.alert-text').textContent =
+        '⚠ Could not load live weather data. Check your internet connection. Retrying in 30 minutes.';
+    }
+  }
+
+  // ── INIT & AUTO-REFRESH ──
+  fetchWeather();
+  setInterval(fetchWeather, REFRESH_MS);
+</script>
+</body>
+</html>
