@@ -1219,10 +1219,16 @@
     );
 
     try {
-      const [primary, ...areaResults] = await Promise.all([
-        fetch(primaryURL).then(r => r.json()),
-        ...areaURLs.map(u => fetch(u).then(r => r.json()))
-      ]);
+      const primary = await fetch(primaryURL).then(r => r.json());
+const areaResults = [];
+for (const u of areaURLs) {
+    try {
+        const res = await fetch(u).then(r => r.json());
+        areaResults.push(res);
+    } catch(e) {
+        areaResults.push(null);
+    }
+}
 
       // ── CURRENT CONDITIONS ──
       const cur = primary.current;
